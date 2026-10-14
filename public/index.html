@@ -4,6 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>PICK! CARD</title>
+<meta name="description" content="사진 한 장으로 뽑는 나만의 트레이딩 카드 ✦ 김박사의 카드팩을 열어보세요">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="PICK! CARD">
+<meta property="og:title" content="PICK! CARD">
+<meta property="og:description" content="사진 한 장으로 뽑는 나만의 트레이딩 카드 ✦ 김박사의 카드팩을 열어보세요">
+<meta property="og:url" content="https://ssowook-pickcard.pages.dev/">
+<meta property="og:image" content="https://ssowook-pickcard.pages.dev/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ssowook-pickcard.pages.dev/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&family=Silkscreen:wght@700&family=Rubik:ital,wght@1,700;1,800;1,900&display=swap">
 <style>
@@ -1153,6 +1168,26 @@ body:has(#flow.game:not([hidden])) .site-foot a:hover{color:#fff}
 .ht2 .hbtn svg{width:min(5.8cqw,25px);height:min(5.8cqw,25px);margin-left:min(1cqw,4px);color:#1d2556;stroke-width:3.4;shape-rendering:crispEdges;animation:startnudge .9s ease-in-out infinite alternate}
 @keyframes startnudge{from{transform:translateX(0)}to{transform:translateX(3px)}}
 @media (prefers-reduced-motion:reduce){.ht2 .hbtn svg{animation:none}}
+/* ================= text edit (기술명 / 기술 설명 only, once per card) ================= */
+.editbtn{margin-top:14px;height:30px;padding:0 12px;border:0;background:none;display:inline-flex;align-items:center;gap:6px;font:700 12.5px/1 var(--gm);color:#a9c6ff;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.editbtn svg{width:14px;height:14px}
+.editbtn:focus-visible{outline:2px solid #a9c6ff;outline-offset:2px;border-radius:6px}
+.emodal{position:absolute;inset:0;z-index:45;background:rgba(7,10,28,.72);display:flex;align-items:center;justify-content:center;padding:18px}
+.epanel{width:100%;max-width:340px;max-height:100%;overflow-y:auto;background:#fff;color:var(--ink);border:var(--line);border-radius:16px;box-shadow:var(--drop);padding:18px 16px 16px;font-family:var(--gm)}
+.epanel h3{margin:0 0 14px;font:700 16px/1.2 var(--gm);text-align:center}
+.epanel .el{display:block;margin:12px 0 6px;font:700 12.5px/1 var(--gm);color:var(--ink2)}
+.epanel .el small{font-weight:400;color:var(--mute);margin-left:4px}
+.erow{display:flex;align-items:center;gap:8px}
+.epanel input{width:100%;min-width:0;height:40px;padding:0 10px;border:1.5px solid #c9cedc;border-radius:10px;font:500 15px/1 var(--kr);color:var(--ink);background:#fff}
+.epanel input:focus{outline:none;border-color:var(--blue)}
+.epanel input+input{margin-top:6px}
+.eacts{display:flex;gap:8px;margin-top:18px}
+.eacts button{flex:1;height:44px;border-radius:99px;border:var(--line);box-shadow:var(--drop);font:700 15px/1 var(--gm);color:var(--ink);background:#fff;cursor:pointer}
+.eacts .eok{background:var(--pink)}
+.econf{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;padding:28px;background:rgba(7,10,28,.5)}
+.econf .epanel{max-width:300px;text-align:center}
+.econf p{margin:4px 0 0;font:700 15px/1.6 var(--gm);color:var(--ink)}
+.eacts .eyes{background:var(--pink)}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1302,6 +1337,7 @@ body:has(#flow.game:not([hidden])) .site-foot a:hover{color:#fff}
           <button class="ghost" id="again" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/></svg>다른 팩 뽑기</button>
           <button class="solid" id="save" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></svg>저장하기</button>
         </div>
+        <button class="editbtn" id="editTxt" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>문구 수정</button>
       </div>
     </div>
   </section>
@@ -1612,31 +1648,6 @@ function pixelate(src,c){
   }).catch(()=>({url:src,ar:c.ar}));
 }
 /* photo analysis: only what is clearly visible in the cropped card photo */
-const SKILL_PROMPT=`첨부한 사진 한 장(트레이딩 카드에 들어갈 영역)을 보고 게임 카드 기술 후보를 만든다.
-1단계 — 사진 전체를 먼저 보고, 실제로 보이는 것만 짧게 적는다(안 보이면 "없음", 애매하면 "모름"):
-인원 수 / 표정 / 얼굴·몸 사이 거리와 카메라와의 거리 / 시선 / 포즈 / 손동작·제스처 / 셀카·거울샷 여부(단서가 보일 때만) / 음식 / 동물 / 소품·들고 있는 물건(글자가 보이면 그대로) / 의상에서 명확한 특징(왕관·모자·가면 등) / 얼굴 가림 / 행동 / 실내·야외 / 배경 / 구도.
-그리고 key_points에 "이 사진을 다른 사진과 구분하는 가장 눈에 띄는 사실" 1~3개를 적는다.
-  예) "두 사람 모두 왕관을 씀", "HAPPY 1500 DAYS 소품을 들고 있음", "두 사람이 같은 얼굴 소품으로 얼굴을 가림", "케이크를 들고 있음", "거울 속에 함께 찍힘"
-2단계 — 확인된 특징 2~3개를 조합해 기술 후보 8개를 만든다.
-- 후보 대부분은 key_points 중 하나 이상을 반드시 근거로 쓴다. 손 모양·시선 같은 작은 특징만으로 만든 후보는 2개 이하.
-- 사진을 그대로 설명하지 말고, 그 상황을 게임 기술처럼 진지하게 비튼다.
-- 후보마다 서로 다른 조합을 쓰고, 같은 단어·같은 말장난을 반복하지 않는다.
-규칙:
-- 사진에 보이는 것만 근거로 쓴다. 성별·나이·연인·친구·가족 같은 관계, 감정의 이유, 사진 밖 상황을 추측하지 않는다.
-- 확실히 보이지 않는 동물·음식·포즈(브이/하트 등)·소품·행동은 절대 쓰지 않는다. 사람이 한 명이라도 보이면 '무인/사람 없음' 계열은 금지, 사람이 없으면 표정·포즈를 쓰지 않는다.
-- basis에는 1단계에서 실제로 적은 특징만 넣는다. 애매하면 구도·위치·거리·화면 점유율·밝기·배경 같은 안전한 특징을 쓴다.
-- 외모 평가·칭찬·감성 문구("예쁘다", "귀엽다", "사랑스럽다", "따뜻한", "분위기", "추억" 등) 금지.
-- 톤: 기술명은 짧고 일상적인 말투로 바로 이해되게, 설명은 게임 능력처럼 진지하게 헛소리. 짧고 건조하게.
-- skill(기술명)은 2~8자. line1은 기술 효과, line2는 가벼운 반전. 각 18자 이내, "~한다/~다." 체.
-좋은 예)
-{"skill":"거리두기 실패","line1":"가까워질수록 방어력이 감소한다.","line2":"아무도 물러서지 않는다.","basis":["2명","얼굴 가까움"]}
-{"skill":"왕위 공동 소유","line1":"왕관이 두 개라 서열 정리에 실패했다.","line2":"즉위식은 아직 미정이다.","basis":["2명","왕관 2개"]}
-{"skill":"신원 확인 실패","line1":"얼굴을 제출하지 않아 본인 확인이 보류된다.","line2":"소품이 대신 출석했다.","basis":["2명","같은 소품으로 얼굴 가림"]}
-{"skill":"5분만 더","line1":"종료 시간을 무기한 연장한다.","line2":"아무도 먼저 일어나지 않는다.","basis":["여러 명","테이블 위 음식"]}
-{"skill":"사진 한 장만","line1":"최소 47장을 촬영한다.","line2":"마음에 드는 건 그중 한 장이다.","basis":["여러 명","카메라 응시"]}
-{"skill":"아무 생각 없음","line1":"이미 아무 생각이 없어서 추가 효과가 없다.","line2":"표정 변화는 다음 패치 예정이다.","basis":["무표정","정면 응시"]}
-JSON만 출력: {"features":{"인원":"","표정":"","거리":"","시선":"","포즈":"","손":"","셀카":"","음식":"","동물":"","소품":"","의상":"","얼굴가림":"","행동":"","장소":"","배경":"","구도":""},"key_points":["",""],"candidates":[{"skill":"","line1":"","line2":"","basis":["",""]}]}`;
-const FOCUS=['인원 수와 거리','표정','시선 방향','포즈와 손동작','셀카 여부와 구도','음식·동물·소품','행동','실내·야외와 배경'];
 /* recently used skill names / first lines (this browser only) — not repeated in the next results */
 const RECENT=(()=>{let r={s:[],l:[]};try{const v=JSON.parse(localStorage.getItem('pickcard_recent')||'null');if(v&&Array.isArray(v.s)&&Array.isArray(v.l))r=v}catch(e){}return r})();
 function remember(t){if(!t||!t.skill)return;const l1=String(t.desc||'').split('<br>')[0];
@@ -1653,15 +1664,7 @@ function chooseCand(list,avoid){
   return rnd(strong.length&&Math.random()<.7?strong:ok);
 }
 function cleanTxt(s,max){s=String(s==null?'':s).replace(/[\r\n<>]+/g,' ').replace(/\s+/g,' ').trim();return s.length>max?s.slice(0,max):s}
-function fromModel(j){
-  if(!j||typeof j!=='object')return null;
-  const skill=cleanTxt(j.skill,10),l1=cleanTxt(j.line1,26),l2=cleanTxt(j.line2,26);const p=120+Math.floor(Math.random()*880);
-  if(!skill||!l1)return null;
-  const w=Array.isArray(j.basis)?j.basis.filter(Boolean).length:1;
-  return{skill,desc:l2?l1+'<br>'+l2:l1,power:p,w};
-}
-const MODEL_CACHE=new Map(); // photo+crop → {features, list}: one analysis per photo, both draws pick from it
-function fromModelList(j){const list=j&&Array.isArray(j.candidates)?j.candidates:[j];return list.map(fromModel).filter(Boolean)}
+const MODEL_CACHE=new Map(); // photo+crop → cropped analysis canvas: each photo is analysed on-device once (features cached in featCache)
 function fromPixels(x,w,h){ // no model available: describe only measurable light/colour
   const d=x.getImageData(0,0,w,h).data;let L=0,warm=0,sat=0,n=0;
   for(let i=0;i<d.length;i+=32){const r=d[i],g=d[i+1],b=d[i+2],mx=Math.max(r,g,b),mn=Math.min(r,g,b);L+=(r*.3+g*.59+b*.11);warm+=r-b;sat+=mx?(mx-mn)/mx:0;n++}
@@ -1675,9 +1678,8 @@ function fromPixels(x,w,h){ // no model available: describe only measurable ligh
   return{skill:pick[0],desc:pick[1]+'<br>'+pick[2],power};
 }
 /* ---------- photo analysis ----------
-   1) inside Claude: the image model (window.claude 'sample')
-   2) anywhere else: on-device MediaPipe Tasks Vision (faces + expressions, hands + gestures, objects / food)
-   3) if neither can run: an "unknown" card that says so (never a fake mood line)
+   1) on-device MediaPipe Tasks Vision (faces + expressions, hands + gestures, objects / food) — no external AI API
+   2) if it can't run: an "unknown" card that says so (never a fake mood line)
    Skill text only uses what was actually detected. */
 /* same Google MediaPipe model files, mirrored on npm so jsDelivr / unpkg can serve them (Google's own host is tried after) */
 const MP=Object.assign({
@@ -1909,46 +1911,22 @@ function pickSkill(keys,avoid,avoidKeys){
   if(t){delete t.w;return t}
   const u=SK.unknown.filter(v=>!(avoid||[]).includes(v[0]));return buildSkill('unknown',rnd(u.length?u:SK.unknown),{});
 }
-/* Vision AI request: inside Claude → window.claude 'sample'; on the website → /api/analyze (Netlify Function, key stays on the server) */
-async function visionRequest(cv,avoid,facts){
-  const f2=FOCUS.slice().sort(()=>Math.random()-.5).slice(0,2),ban=[...new Set([...avoid,...RECENT.s.slice(0,14)])];
-  const sample=window.claude&&window.claude.use?await window.claude.use('sample').catch(()=>null):null;
-  const lim=sample?await sample.limits().catch(()=>null):null;
-  if(sample&&lim&&lim.images){
-    const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',.9));if(!blob)throw new Error('no-image');
-    const extra=`\n이번 뽑기 변주: 사진에 보인다면 '${f2[0]}', '${f2[1]}' 쪽 특징이 들어간 조합을 후보에 꼭 섞는다.`+
-      (ban.length?`\n이미 쓴 기술명(다시 쓰지 말고 다른 조합으로 새로 만들 것): ${ban.join(', ')}`:'')+
-      (facts?`\n이 사진에서 이미 확인된 사실(이 사실만 사용하고 새로운 대상은 추가하지 말 것): ${JSON.stringify(facts)}`:'');
-    return sample.json(SKILL_PROMPT+extra,{images:[blob],modelTier:'default',effort:'low'});
-  }
-  const ac=new AbortController(),to=setTimeout(()=>ac.abort(),45000);
-  try{
-    const r=await fetch(window.PICK_API||'/api/analyze',{method:'POST',headers:{'content-type':'application/json'},signal:ac.signal,
-      body:JSON.stringify({image:cv.toDataURL('image/jpeg',.85),avoid:ban,focus:f2,facts:facts||null})});
-    if(!r.ok)throw new Error('analyze '+r.status);
-    return await r.json();
-  }finally{clearTimeout(to)}
-}
 async function analyzePhoto(src,c){
   const same=S.drawPhoto===src,avoid=same?(S.used||[]):[],avoidKeys=same?(S.usedKeys||[]):[],prevPow=same&&S.prev?S.prev.power:null;
   const fix=t=>{if(prevPow!=null&&t.power===prevPow)t.power=t.power>500?t.power-37:t.power+41;return t};
   const mk=src+'|'+[c.s,c.ox,c.oy].map(v=>v.toFixed(4)).join(',');
   try{
-    let A=MODEL_CACHE.get(mk);
-    if(!A){ // first time for this photo: analyse the cropped card area once
+    let cv=MODEL_CACHE.get(mk);
+    if(!cv){ // first time for this photo: crop the card area once (features are cached per photo+crop)
       const im=await loadImg(src),fw=im.naturalWidth/c.s,fh=fw/PHOTO_R,k=Math.min(1,1024/fw);
-      const cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(fw*k));cv.height=Math.max(1,Math.round(fh*k));
+      cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(fw*k));cv.height=Math.max(1,Math.round(fh*k));
       cv.getContext('2d').drawImage(im,-c.ox*fw,-c.oy*fh,fw,fh,0,0,cv.width,cv.height);
-      A={cv,pending:visionRequest(cv,avoid,null).then(j=>{A.features=j&&(j.features||j.key_points)?{features:j.features||null,key_points:j.key_points||null}:null;A.list=fromModelList(j);return A})};
-      MODEL_CACHE.set(mk,A);A.pending.catch(()=>MODEL_CACHE.delete(mk));
+      MODEL_CACHE.set(mk,cv);
     }
-    await A.pending;
-    let t=chooseCand(A.list.filter(x=>!avoid.includes(x.skill)),avoid);
-    if(!t&&A.features&&A.cv){ // every candidate used: ask for new ones built only from the same facts
-      const more=fromModelList(await visionRequest(A.cv,avoid,A.features));A.list=A.list.concat(more);t=chooseCand(more,avoid);
-    }
-    if(t){t=Object.assign({},t);delete t.w;remember(t);return fix(Object.assign(t,{key:'model:'+t.skill}))}
-  }catch(e){console.warn('vision analysis failed',e)}
+    const t=pickSkill(detectKeys(await visionFeatures(mk,cv)),avoid,avoidKeys);
+    if(t.key!=='unknown')remember(t);
+    return fix(t);
+  }catch(e){console.warn('photo analysis failed',e)}
   return fix(pickSkill([],avoid,avoidKeys)); // analysis unavailable: honest "unknown" card, no invented facts
 }
 
@@ -2143,7 +2121,7 @@ function showResult(){
   $('#backFace').innerHTML=backHTML();
   $('#frontFace').innerHTML=cardHTML(S.card,S.photoForCard,S.name,S.cropForCard);
   $('#hint').hidden=false; $('#hint span').textContent='카드를 탭해서 뒤집어 보세요';
-  $('#after').hidden=true;updDraws();
+  $('#after').hidden=true;updDraws();$('#editTxt').hidden=!!S.card.edited;
   try{if(!(history.state&&history.state.pc==='result'))history.pushState({pc:'result'},'')}catch(e){}
   $('#result').classList.remove('fadein');void $('#result').offsetWidth;$('#result').classList.add('fadein');
   setTimeout(()=>SFX.play('cardin'),90);
@@ -2659,6 +2637,47 @@ $('#save').onclick=async()=>{
   }catch(e){console.error(e);toast('이미지를 만들지 못했어요. 다시 눌러 주세요')}
   finally{btn.disabled=false;label.textContent=orig}
 };
+
+/* text edit: only 기술명(skill) / 기술 설명(desc), once per drawn card — type, HP, POWER, NO., weakness, resistance, retreat, rarity, photo stay as they are */
+function repaintFront(){const el=$('#frontFace .card');if(!el)return;const c=el.querySelector('canvas');if(!c)return;
+  const w=el.offsetWidth||(el.closest('.result')||{}).offsetWidth||330,dpr=Math.min(3,window.devicePixelRatio||1),k=clamp(Math.round(w*dpr)/CW,.5,1.5);
+  const own=S.card;paintCard(S.card,S.photoForCard,S.name,S.cropForCard,k).then(cv=>{if(S.card!==own)return;c.width=cv.width;c.height=cv.height;c.getContext('2d').drawImage(cv,0,0)}).catch(()=>{})}
+function closeEdit(){const m=document.querySelector('.emodal');if(m)m.remove()}
+function openEdit(){
+  if(!S.card||S.card.edited||document.querySelector('.emodal'))return;
+  const d=S.card,[l1='',l2='']=descLines(d);
+  const m=document.createElement('div');m.className='emodal';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.setAttribute('aria-label','문구 수정');
+  m.innerHTML=`<div class="epanel"><h3>문구 수정</h3>
+    <label class="el" for="eSkill">기술명<small>최대 10자</small></label>
+    <div class="erow"><input id="eSkill" maxlength="10" autocomplete="off"></div>
+    <label class="el" for="eL1">기술 설명<small>각 줄 최대 26자</small></label>
+    <input id="eL1" maxlength="26" autocomplete="off" placeholder="첫째 줄"><input id="eL2" maxlength="26" autocomplete="off" placeholder="둘째 줄 (선택)" aria-label="기술 설명 둘째 줄">
+    <div class="eacts"><button type="button" class="ecancel">취소</button><button type="button" class="eok">수정 완료</button></div></div>
+    <div class="econf" hidden role="alertdialog" aria-modal="true" aria-label="수정 확인"><div class="epanel"><p>문구 수정은 1회만 가능해요.<br>이대로 저장할까요?</p>
+      <div class="eacts"><button type="button" class="eno">아니오</button><button type="button" class="eyes">예</button></div></div></div>`;
+  const q=k=>m.querySelector(k);
+  q('#eSkill').value=d.skill||'';q('#eL1').value=l1;q('#eL2').value=l2;
+  const cf=q('.econf');let pend=null;
+  const noConf=()=>{cf.hidden=true;pend=null;q('.eok').focus()}; // [아니오]: close the confirm only, keep the typed text, chance not used
+  q('.ecancel').onclick=closeEdit;
+  m.addEventListener('click',e=>{if(e.target===m)closeEdit();else if(e.target===cf)noConf()});
+  m.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!cf.hidden)noConf();else closeEdit()}else if(e.key==='Enter'&&e.target.tagName==='INPUT'&&cf.hidden){e.preventDefault();q('.eok').click()}});
+  q('.eno').onclick=noConf;
+  q('.eyes').onclick=()=>{ // [예]: apply, use up this card's one edit
+    if(!pend||d.edited)return;
+    d.skill=pend.sk;d.desc=pend.desc;d.edited=true;$('#editTxt').hidden=true;
+    closeEdit();repaintFront();toast('문구를 수정했어요');
+  };
+  q('.eok').onclick=()=>{
+    const sk=cleanTxt(q('#eSkill').value,10),a=cleanTxt(q('#eL1').value,26),b=cleanTxt(q('#eL2').value,26);
+    if(!sk){toast('기술명을 입력해 주세요');q('#eSkill').focus();return}
+    if(!a&&!b){toast('기술 설명을 입력해 주세요');q('#eL1').focus();return}
+    pend={sk,desc:a&&b?a+'<br>'+b:(a||b)};cf.hidden=false;q('.eyes').focus();
+  };
+  $('#app').appendChild(m);setTimeout(()=>q('#eSkill').focus(),30);
+}
+$('#editTxt').onclick=openEdit;
+window.addEventListener('popstate',closeEdit);
 
 /* home sample cards */
 const sp=samplePhoto();
