@@ -1280,8 +1280,8 @@ body:has(#flow.game:not([hidden])) .site-foot a:hover{color:#fff}
       </div>
       <div class="tip"><em>TIP</em><span>얼굴이 잘 보이는 사진을 올려주세요!</span></div>
       <div class="field">
-        <label for="cardName">카드 이름<em class="req">필수</em><small>최대 10자</small></label>
-        <input id="cardName" maxlength="10" placeholder="카드에 들어갈 이름을 입력해 주세요" autocomplete="off" required aria-describedby="nameMsg">
+        <label for="cardName">카드 이름<em class="req">필수</em><small>최대 7자</small></label>
+        <input id="cardName" maxlength="7" placeholder="카드에 들어갈 이름을 입력해 주세요" autocomplete="off" required aria-describedby="nameMsg">
         <p class="nmsg" id="nameMsg" hidden>카드 이름을 입력해야 다음 단계로 갈 수 있어요.</p>
       </div>
       <button class="cta" id="start" type="button" disabled>
@@ -1453,11 +1453,11 @@ function roll(){
   const r=Math.random();
   const elem=rnd(Object.keys(ELEM));
   let mat=COLOR_OF[elem], rare=false;
-  if(r>=.99){mat='secret';rare=true}            // hidden top rarity 1% (from NORMAL) — NORMAL 69 / HEART 10 / GOLD 9 / RAINBOW 7 / PIXEL 4 / SECRET 1 = 100%
-  else if(r<.04){mat='pixel';rare=true}
-  else if(r<.11){mat='rainbow';rare=true}
-  else if(r<.20){mat='gold';rare=true}
-  else if(r<.30){mat='heart';rare=true}
+  // NORMAL 40 / HEART 20 / GOLD 15 / RAINBOW 15 / PIXEL 10 = 100% (no SECRET)
+  if(r<.10){mat='pixel';rare=true}
+  else if(r<.25){mat='rainbow';rare=true}
+  else if(r<.40){mat='gold';rare=true}
+  else if(r<.60){mat='heart';rare=true}
   return Object.assign({elem,mat,rare,skill:'',desc:'',power:0,no:String(1+Math.floor(Math.random()*999)).padStart(3,'0')},rollStats(elem));
 }
 
@@ -1597,6 +1597,12 @@ function renderS1(){
 function updStart(){const ok=S.sel>=0&&$('#cardName').value.trim().length>0;$('#start').disabled=!ok;$('#nameMsg').hidden=!(S.sel>=0&&!$('#cardName').value.trim()&&$('#cardName').dataset.touched)}
 $('#cardName').addEventListener('input',e=>{e.target.dataset.touched=1;updStart()});
 $('#cardName').addEventListener('blur',e=>{e.target.dataset.touched=1;updStart()});
+/* card name: max 7 characters (한글/영문/숫자 each = 1), also for paste; Korean IME is trimmed when composition ends */
+{const nm=$('#cardName'),MAXN=7;let ime=false;
+ const cut=()=>{const a=Array.from(nm.value);if(a.length>MAXN){nm.value=a.slice(0,MAXN).join('');updStart()}};
+ nm.addEventListener('compositionstart',()=>{ime=true});
+ nm.addEventListener('compositionend',()=>{ime=false;cut()});
+ nm.addEventListener('input',()=>{if(!ime)cut()});}
 /* crop editor: the box is the card photo frame (same aspect); values are stored in frame units */
 function bindCrop(){
   const box=$('#crop'),im=$('#cropImg'),z=$('#zoom'),pts=new Map();let last=null;
@@ -1632,7 +1638,8 @@ function newCard(){
   const photo=S.photos[S.sel];S.textJob=null;
   if(S.drawPhoto!==photo){S.drawPhoto=photo;S.draws=0;S.used=[];S.usedKeys=[];S.prev=null;S.photoCount=(S.photoCount||0)+1}
   let card=roll(),t=0;const pv=S.prev; // second draw: different type / colour / NO. / rarity material
-  while(pv&&t++<60&&(card.elem===pv.elem||card.no===pv.no||(card.rare&&card.mat===pv.mat)))card=roll();
+  const tier=c=>c.rare?c.mat:'normal'; // rarity tier incl. NORMAL: 2nd card never repeats the 1st card's tier
+  while(pv&&t++<200&&(card.elem===pv.elem||card.no===pv.no||tier(card)===tier(pv)))card=roll();
   S.card=card;
   S.photoForCard=S.photos[S.sel];
   S.cropForCard=Object.assign({},S.crops[S.sel]);
@@ -2554,7 +2561,8 @@ async function paintCard(d,photo,name,crop,scale=1){
    x.lineWidth=2.2;x.strokeStyle='#262b35';rr(x,bx,by,bw,bh,18);x.stroke();
    x.lineWidth=1.2;x.strokeStyle='rgba(255,255,255,.95)';rr(x,bx+3,by+3,bw-6,bh-6,15);x.stroke();
    x.fillStyle='#111';x.font=`italic 800 38px ${LOGO}`;x.textAlign='center';x.textBaseline='middle';
-x.fillText('BASIC',bx+bw/2,by+bh/2+1)}
+{const RL=d.rare?String(d.mat).toUpperCase():'NORMAL',tw=x.measureText(RL).width,mx=bw-28; // rarity name in the old BASIC spot (same font/size/centre)
+ if(tw>mx){x.save();x.translate(bx+bw/2,by+bh/2+1);x.scale(mx/tw,1);x.fillText(RL,0,0);x.restore()}else x.fillText(RL,bx+bw/2,by+bh/2+1)}}
   // ---- name / HP / type
   x.textBaseline='alphabetic';x.fillStyle='#111';
   const HP=String(d.hp||1500);x.font=`800 66px ${KR}`;x.textAlign='right';const hpW=x.measureText(HP).width;x.fillText(HP,846,136);
